@@ -1,23 +1,45 @@
-// import { Button } from "@/components/ui/button";
-// import React from "react";
+// // import { Button } from "@/components/ui/button";
+// // this is test of client components
+// "use client";
+// import { useTRPC } from "@/trpc/client";
+// import { useQuery } from "@tanstack/react-query";
 
 // const page = () => {
+//   const trpc = useTRPC();
+//   // trpc.lallan.queryOptions({ text: "Hello!" });
+//   // To get data from API's using a usequery
+//   const { data } = useQuery(trpc.lallan.queryOptions({ text: "Saurab" }));
 //   return (
 //     <div>
-//       <Button variant="destructive">kick</Button>
+//       {/* then render data here */}
+//       {JSON.stringify(data)}
 //     </div>
 //   );
 // };
 
 // export default page;
+// this look like works but not properly so always create through advance server rendering below:::
+// import { caller } from "../trpc/server";
 
-// for just db.ts check or making it server components(means only run in server):
-// for try change users to posts.
-import { prisma } from "@/lib/db";
+// const Page = async () => {
+//   const data = await caller.hello({ text: "Saurab Server" });
+//   //    ^? { greeting: string }
+//   return <div>{JSON.stringify(data)}</div>;
+// };
 
-const page = async () => {
-  const posts = await prisma.post.findMany();
-  return <div>{JSON.stringify(posts, null, 2)}</div>;
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Client } from "./client";
+
+const Page = async () => {
+  const queryClient = getQueryClient();
+  void queryClient.prefetchQuery(
+    trpc.hello.queryOptions({ text: "Saurab Server" }),
+  );
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Client />
+    </HydrationBoundary>
+  );
 };
-
-export default page;
