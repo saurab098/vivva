@@ -27,19 +27,50 @@
 //   return <div>{JSON.stringify(data)}</div>;
 // };
 
-import { getQueryClient, trpc } from "@/trpc/server";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { Client } from "./client";
+// import { getQueryClient, trpc } from "@/trpc/server";
+// import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+// import { Client } from "./client";
 
-const Page = async () => {
-  const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(
-    trpc.hello.queryOptions({ text: "Saurab Server" }),
+// const Page = async () => {
+//   const queryClient = getQueryClient();
+//   void queryClient.prefetchQuery(
+//     trpc.hello.queryOptions({ text: "Saurab Server" }),
+//   );
+
+//   return (
+//     <HydrationBoundary state={dehydrate(queryClient)}>
+//       <Client />
+//     </HydrationBoundary>
+//   );
+// };
+
+// page.tsx for use function in background jobs
+"use client";
+
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+const Page = () => {
+  const trpc = useTRPC();
+  const invoke = useMutation(
+    trpc.invoke.mutationOptions({
+      // after adding toaster in layout:
+      onSuccess: () => {
+        toast.success("Background job started");
+      },
+    }),
   );
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Client />
-    </HydrationBoundary>
+    <div className="p-4 max-w-7xl mx-auto">
+      <Button
+        disabled={invoke.isPending}
+        onClick={() => invoke.mutate({ text: "Saurab" })}
+      >
+        Invoke Background Job
+      </Button>
+    </div>
   );
 };
