@@ -33,5 +33,6 @@ export const processTask = inngest.createFunction(
       "Write a typescript function that removes unnecessary whitespace",
     );
     console.log(output);
+    return { result: output };
   },
 );
